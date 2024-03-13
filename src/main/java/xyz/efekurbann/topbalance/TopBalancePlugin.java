@@ -1,7 +1,6 @@
 package xyz.efekurbann.topbalance;
 
 import org.bstats.bukkit.Metrics;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -41,18 +40,11 @@ public final class TopBalancePlugin extends JavaPlugin {
 
         getCommand("baltop").setExecutor(new MainCommand(this));
         new Metrics(this, 11047);
-        UpdateChecker updateChecker = new UpdateChecker(this);
-        updateChecker.checkUpdates();
-
         this.getServer().getPluginManager().registerEvents(new Listener() {
             @EventHandler
             public void onJoin(PlayerJoinEvent event) {
                 Player player = event.getPlayer();
                 if (!player.hasPermission("topbalance.admin")) return;
-                if (!updateChecker.isUpToDate()) {
-                    player.sendMessage(ChatColor.GREEN + "An update was found for TopBalance!");
-                    player.sendMessage(ChatColor.GREEN + "Download it here: " + ChatColor.DARK_GREEN + "https://www.spigotmc.org/resources/91372/");
-                }
             }
         }, this);
 

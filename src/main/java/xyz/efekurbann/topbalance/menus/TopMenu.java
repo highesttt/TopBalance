@@ -1,13 +1,12 @@
 package xyz.efekurbann.topbalance.menus;
 
-import com.cryptomorin.xseries.SkullUtils;
 import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import xyz.efekurbann.inventory.GUI;
 import xyz.efekurbann.inventory.Hytem;
@@ -16,6 +15,7 @@ import xyz.efekurbann.topbalance.TopBalancePlugin;
 import xyz.efekurbann.topbalance.objects.TopPlayer;
 import xyz.efekurbann.topbalance.utils.ConfigManager;
 import xyz.efekurbann.topbalance.utils.Tools;
+import xyz.efekurbann.topbalance.utils.UUIDFetcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,14 +63,14 @@ public class TopMenu extends GUI {
                                     .replace("{name}", player.getName()))
                             .withLore(lore).build();
                 } else {
-                    item = getSkull(rank-1, "player-item");
+                    item = getSkull(slot, rank-1, "player-item", false);
                 }
             } else {
                 item = new ItemBuilder(XMaterial.valueOf(config.getString("Gui.items.player-not-found.material").toUpperCase(Locale.ENGLISH)).parseMaterial())
                         .withName(config.getString("Gui.items.player-not-found.name"))
                         .withLore(config.getStringList("Gui.items.player-not-found.lore")).build();
+                addItem(slot, item);
             }
-            addItem(slot, item);
         }
 
 
@@ -112,39 +112,57 @@ public class TopMenu extends GUI {
                         .withName(config.getString("Gui.items.self-item.name"))
                         .withLore(lore).build());
             } else {
-                addItem(config.getInt("Gui.items.self-item.slot"), getSkull(selfRank, "self-item"));
+                getSkull(config.getInt("Gui.items.self-item.slot"), selfRank, "self-item", true);
             }
         });
     }
 
-    public ItemStack getSkull(Integer number, String path) {
-        ItemStack item = XMaterial.PLAYER_HEAD.parseItem();
-        ItemMeta meta = item.getItemMeta();
+    @SuppressWarnings("deprecation")
+    public ItemStack getSkull(Integer slot, Integer number, String path, boolean executor) {
         TopPlayer player = plugin.getPlayersMap().get(number);
+
+        
+        ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+        SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+        // run async task
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    skullMeta.setOwner(UUIDFetcher.getName(player.getUUID()));
+                    item.setItemMeta(skullMeta);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                // continue sync:
+                if (number < 11 || executor == true) {
+                    skullMeta.setDisplayName(Tools.colored(config.getString("Gui.items." + path + ".name")
+                            .replace("{rank}", String.valueOf(number + 1))
+                            .replace("{name}", UUIDFetcher.getName(player.getUUID()))
+                            .replace("{balance}", Tools.formatMoney(player.getBalance()))));
+                    List<String> lore = new ArrayList<>();
+                    for (String str : config.getStringList("Gui.items." + path + ".lore")) {
+                        lore.add(str.replace("{rank}", String.valueOf(number + 1))
+                                .replace("{name}", UUIDFetcher.getName(player.getUUID()))
+                                .replace("{balance}", Tools.formatMoney(player.getBalance())));
+                    }
+                    skullMeta.setLore(Tools.colored(lore));
+
+                    item.setItemMeta(skullMeta);
+
+                    addItem(slot, item);
+                }
+            }
+        });
+        // run after async task
 
         //long start = System.currentTimeMillis();
         //long startNano = System.nanoTime();
-        SkullMeta skullMeta = SkullUtils.applySkin(meta, player.getUUID());
         //System.out.println("[DEBUG] Took " + (System.currentTimeMillis() - start) + "ms");
         //System.out.println("[DEBUG] Took " + (System.nanoTime() - startNano) + " nano sec");
 
         //start = System.currentTimeMillis();
         //startNano = System.nanoTime();
-        skullMeta.setDisplayName(Tools.colored(config.getString("Gui.items." + path + ".name")
-                .replace("{rank}", String.valueOf(number + 1))
-                .replace("{name}", player.getName())
-                .replace("{balance_raw}", String.valueOf(player.getBalance()))
-                .replace("{balance}", Tools.formatMoney(player.getBalance()))));
-        List<String> lore = new ArrayList<>();
-        for (String str : config.getStringList("Gui.items." + path + ".lore")) {
-            lore.add(str.replace("{rank}", String.valueOf(number + 1))
-                    .replace("{name}", player.getName())
-                    .replace("{balance_raw}", String.valueOf(player.getBalance()))
-                    .replace("{balance}", Tools.formatMoney(player.getBalance())));
-        }
-        skullMeta.setLore(Tools.colored(lore));
-
-        item.setItemMeta(skullMeta);
         //System.out.println("[DEBUG] (2) Took " + (System.currentTimeMillis() - start) + "ms");
         //System.out.println("[DEBUG] (2) Took " + (System.nanoTime() - startNano) + " nano sec");
         return item;
