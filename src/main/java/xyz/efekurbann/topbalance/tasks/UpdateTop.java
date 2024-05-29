@@ -25,9 +25,16 @@ public class UpdateTop extends BukkitRunnable {
         plugin.getLogger().info("Task started, updating..");
         long start = System.currentTimeMillis();
         Map<OfflinePlayer, Double> balances = new HashMap<>();
-        for (Player player : Bukkit.getOnlinePlayers()) balances.put(player, VaultManager.getEcon().getBalance((OfflinePlayer) player));
-        for (OfflinePlayer player : Bukkit.getOfflinePlayers()){
-            if (VaultManager.getEcon().hasAccount(player)) balances.put(player, VaultManager.getEcon().getBalance(player));
+        Map<OfflinePlayer, Double> bank = new HashMap<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            bank.put(player, VaultManager.getEcon().bankBalance(player.getUniqueId().toString()).balance);
+            balances.put(player, VaultManager.getEcon().getBalance((OfflinePlayer) player) + bank.get(player));
+        }
+        for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+            if (VaultManager.getEcon().hasAccount(player)) {
+                bank.put(player, VaultManager.getEcon().bankBalance(player.getUniqueId().toString()).balance);
+                balances.put(player, VaultManager.getEcon().getBalance(player) + bank.get(player));
+            }
         }
 
         Map<OfflinePlayer, Double> sortedMap = balances.entrySet().stream().sorted((o1, o2) -> (o2.getValue()).compareTo(o1.getValue())).collect(Collectors.toMap(
@@ -42,7 +49,7 @@ public class UpdateTop extends BukkitRunnable {
         while (iterator.hasNext()){
             if (!(i < max)) break;
             Map.Entry<OfflinePlayer, Double> entry = iterator.next();
-            TopPlayer player = new TopPlayer(entry.getKey().getName(), entry.getKey().getUniqueId(), entry.getValue());
+            TopPlayer player = new TopPlayer(entry.getKey().getName(), entry.getKey().getUniqueId(), entry.getValue() - bank.get(entry.getKey()), bank.get(entry.getKey()));
             plugin.getPlayersMap().put(i, player);
             i++;
         }

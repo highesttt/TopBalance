@@ -51,7 +51,7 @@ public class MainCommand implements CommandExecutor {
                     player.sendMessage(Tools.colored(config.getString("Messages.chat-baltop-format")
                             .replace("{name}", topPlayer.getName())
                             .replace("{balance}", Tools.formatMoney(topPlayer.getBalance()))
-                            .replace("{balance_raw}", String.valueOf(topPlayer.getBalance()))
+                            .replace("{bank}", Tools.formatMoney(topPlayer.getBank()))
                             .replace("{rank}", String.valueOf(rank))));
                 }
             }

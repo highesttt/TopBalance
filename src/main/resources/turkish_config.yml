@@ -5,7 +5,7 @@ Gui:
   size: 27
   #
   # Mevcut değişkenler
-  # - {name} (lore-name), {rank} (lore-name), {balance} - formatted (lore), {balance_raw} (lore)
+  # - {name} (lore-name), {rank} (lore-name), {balance} - formatted (lore), {bank} (lore)
   #
   items:
     player-item:

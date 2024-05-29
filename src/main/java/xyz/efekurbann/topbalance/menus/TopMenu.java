@@ -54,7 +54,7 @@ public class TopMenu extends GUI {
                     for (String str : config.getStringList("Gui.items.player-item.lore")) {
                         lore.add(str.replace("{rank}", String.valueOf(rank))
                                 .replace("{name}", player.getName())
-                                .replace("{balance_raw}", String.valueOf(player.getBalance()))
+                                .replace("{bank}", Tools.formatMoney(player.getBank()))
                                 .replace("{balance}", Tools.formatMoney(player.getBalance())));
                     }
                     item = new ItemBuilder(XMaterial.valueOf(config.getString("Tops." + key + ".material").toUpperCase(Locale.ENGLISH)).parseMaterial())
@@ -102,7 +102,7 @@ public class TopMenu extends GUI {
             for (String str : config.getStringList("Gui.items.self-item.lore")) {
                 lore.add(str.replace("{rank}", String.valueOf(selfRank+1))
                         .replace("{name}", player.getName())
-                        .replace("{balance_raw}", String.valueOf(topPlayer.getBalance()))
+                        .replace("{bank}", Tools.formatMoney(topPlayer.getBank()))
                         .replace("{balance}", Tools.formatMoney(topPlayer.getBalance())));
             }
 
@@ -139,11 +139,13 @@ public class TopMenu extends GUI {
                     skullMeta.setDisplayName(Tools.colored(config.getString("Gui.items." + path + ".name")
                             .replace("{rank}", String.valueOf(number + 1))
                             .replace("{name}", UUIDFetcher.getName(player.getUUID()))
+                            .replace("{bank}", Tools.formatMoney(player.getBank()))
                             .replace("{balance}", Tools.formatMoney(player.getBalance()))));
                     List<String> lore = new ArrayList<>();
                     for (String str : config.getStringList("Gui.items." + path + ".lore")) {
                         lore.add(str.replace("{rank}", String.valueOf(number + 1))
                                 .replace("{name}", UUIDFetcher.getName(player.getUUID()))
+                                .replace("{bank}", Tools.formatMoney(player.getBank()))
                                 .replace("{balance}", Tools.formatMoney(player.getBalance())));
                     }
                     skullMeta.setLore(Tools.colored(lore));
