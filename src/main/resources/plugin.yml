@@ -1,7 +1,7 @@
 name: TopBalance
 version: ${project.version}
 main: xyz.efekurbann.topbalance.TopBalancePlugin
-api-version: 1.12
+api-version: 1.16
 depend: [ Vault, SkCore ]
 authors: [ hyperion, Highest ]
 commands:

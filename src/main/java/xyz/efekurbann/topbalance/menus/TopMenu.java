@@ -122,7 +122,7 @@ public class TopMenu extends GUI {
         TopPlayer player = plugin.getPlayersMap().get(number);
 
         
-        ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
         SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
         // run async task
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
